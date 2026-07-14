@@ -1,79 +1,30 @@
-from datetime import datetime
+from motor.motor_asyncio import AsyncIOMotorClient
+import datetime
 
-from . import users
+# MongoDB connection (Isse config.py se load karna behtar hota hai)
+client = AsyncIOMotorClient("YOUR_MONGODB_URI") 
+db = client["bot_database"]
+users = db["users"]
 
+async def add_user(user_id):
+    user = await users.find_one({"user_id": user_id})
+    if not user:
+        await users.insert_one({
+            "user_id": user_id,
+            "verified_at": None
+        })
 
-async def add_user(user_id: int, first_name: str = "", username: str = ""):
-
-    user = await users.find_one({"_id": user_id})
-
-    if user:
-        return False
-
-    data = {
-        "_id": user_id,
-        "first_name": first_name,
-        "username": username,
-        "joined_date": datetime.utcnow(),
-        "verified": False,
-        "verify_expire": 0
-    }
-
-    await users.insert_one(data)
-
-    return True
-
-
-async def get_user(user_id: int):
-
-    return await users.find_one({"_id": user_id})
-
-
-async def is_user_exist(user_id: int):
-
-    user = await users.find_one({"_id": user_id})
-
-    return bool(user)
-
-
-async def delete_user(user_id: int):
-
-    await users.delete_one({"_id": user_id})
-
-
-async def total_users():
-
-    return await users.count_documents({})
-
-
-async def get_all_users():
-
-    async for user in users.find({}):
-
-        yield user
-
-
-async def update_verify(user_id: int, expire_time: int):
-
+async def set_verify(user_id):
     await users.update_one(
-        {"_id": user_id},
-        {
-            "$set": {
-                "verified": True,
-                "verify_expire": expire_time
-            }
-        }
+        {"user_id": user_id},
+        {"$set": {"verified_at": datetime.datetime.now()}}
     )
 
-
-async def remove_verify(user_id: int):
-
-    await users.update_one(
-        {"_id": user_id},
-        {
-            "$set": {
-                "verified": False,
-                "verify_expire": 0
-            }
-        }
-    )
+async def is_verified(user_id):
+    user = await users.find_one({"user_id": user_id})
+    if user and user.get("verified_at"):
+        # Check if 24 hours have passed
+        if datetime.datetime.now() - user["verified_at"] < datetime.timedelta(hours=24):
+            return True
+    return False
+    
