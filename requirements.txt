@@ -1,1 +1,7 @@
-
+pyrogram
+tgcrypto
+pymongo
+motor
+flask
+gunicorn
+opencv-python
