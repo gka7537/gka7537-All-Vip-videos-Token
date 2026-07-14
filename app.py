@@ -1,6 +1,6 @@
 from flask import Flask
 import threading
-import bot  # Yahan aapki bot wali file ka naam hona chahiye
+import main # Yahan 'import main' likhein
 
 app = Flask(__name__)
 
@@ -9,10 +9,10 @@ def home():
     return "Bot is running!"
 
 def start_bot():
-    bot.run() # Ye command aapke bot ko start karegi
+    # main.py mein aapne 'app' variable banaya hai, isliye main.app.run()
+    main.app.run() 
 
 if __name__ == '__main__':
-    # Ek thread mein bot chalayein, dusre mein web server
     threading.Thread(target=start_bot).start()
     app.run(host='0.0.0.0', port=10000)
     
