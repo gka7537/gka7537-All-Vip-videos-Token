@@ -1,23 +1,18 @@
 from flask import Flask
-from threading import Thread
-import os
+import threading
+import bot  # Yahan aapki bot wali file ka naam hona chahiye
 
 app = Flask(__name__)
 
-# Render port 10000 par expect karta hai
-PORT = 10000 
-
 @app.route('/')
 def home():
-    return "Bot is running on port 10000!"
+    return "Bot is running!"
 
-def run_web():
-    # Yahan port 10000 force kiya gaya hai
-    app.run(host='0.0.0.0', port=PORT)
+def start_bot():
+    bot.run() # Ye command aapke bot ko start karegi
 
 if __name__ == '__main__':
-    t = Thread(target=run_web)
-    t.start()
+    # Ek thread mein bot chalayein, dusre mein web server
+    threading.Thread(target=start_bot).start()
+    app.run(host='0.0.0.0', port=10000)
     
-    # Yahan se aapka main bot run hoga
-    import bot 
